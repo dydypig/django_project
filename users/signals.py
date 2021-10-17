@@ -1,24 +1,24 @@
-from django.db.models.signals import post_save, pre_save
+from django.db.models.signals import post_save, pre_delete
 from django.contrib.auth.models import User
 from django.dispatch import receiver
 from .models import Profile
+from django.core.files.storage import default_storage
 
-
-# @receiver(pre_save)
-# def set_profile_cache(sender,instance,**kwargs):
-#     pass
+@receiver(pre_delete,sender=Profile)
+def delete_profile_pic(sender,instance,**kwargs):
+    p = instance
+    if p.image.file.name != 'default.jpg':
+        default_storage.delete(p.image.file.name)
 
 @receiver(post_save, sender=User)
 def create_profile(sender,instance,created,**kwargs):
     if created:
         Profile.objects.create(user=instance)
-        instance.profile.save()
     else:
-        try:
+        if hasattr(instance,'profile'):
             instance.profile.save()
-        except:
-            Profile.objects.create(user=instance)
-            instance.profile.save()
+        else:
+            Profile.objects.create(user=instance)     
 
 # @receiver(post_save, sender=User)
 # def create_profile(sender,instance,**kwargs):

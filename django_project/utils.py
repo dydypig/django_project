@@ -16,7 +16,10 @@ def image_resize(image, width, height):
     }
 
     # Open the image using Pillow
-    img = Image.open(image)
+    try:
+        img = Image.open(image)
+    except:
+        return
     # check if either the width or height is greater than the max
     if img.width > width or img.height > height:
         output_size = (width, height)

@@ -6,6 +6,7 @@ from django.contrib.auth import user_logged_in
 from django.contrib import messages
 from .forms import UserRegisterForm, UserUpdateFrom, ProfileUpdateForm
 from django.contrib.auth.models import User
+from django.core.files.storage import default_storage
 
 
 # Create your views here.
@@ -27,6 +28,10 @@ def register(request):
 def profile(request):
     current_user = request.user
     if request.method == "POST":
+        try:
+            oldfile = current_user.profile.image.file.name
+        except:
+            oldfile = 'default.jpg'
         u_form = UserUpdateFrom(request.POST,instance=current_user)
         p_form = ProfileUpdateForm(request.POST,
                                     request.FILES,
@@ -34,6 +39,8 @@ def profile(request):
         if u_form.is_valid() and p_form.is_valid():
             u_form.save()
             p_form.save()
+            if oldfile != 'default.jpg' and oldfile != current_user.profile.image.file.name:
+                default_storage.delete(oldfile)
             messages.success(request,f'Account has been updated')
             return redirect('profile')
     else:
