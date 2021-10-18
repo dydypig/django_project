@@ -1,0 +1,15 @@
+# Logs and databases #
+######################
+*.log
+*.sql
+*.sqlite3
+
+# pyache #
+######################
+*.pyc
+
+# folders to ignore #
+######################
+migrations/
+__pycache__/
+media/
