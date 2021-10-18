@@ -1,8 +1,10 @@
-from django.shortcuts import render,get_object_or_404
+from django.shortcuts import redirect, render,get_object_or_404
 from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from .models import Post
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 
 # Create your views here.
 def home(request):
@@ -10,6 +12,24 @@ def home(request):
         'posts':Post.objects.all()
     }
     return render(request, 'blog/home.html',context)
+
+def like_view(request,cururl,pk):
+    post = get_object_or_404(Post,id=pk)
+    page = request.POST.get('pages')
+    page_str = "?page=" + str(page)
+    if request.user.is_authenticated:
+        if request.user in post.likes.all():
+            post.likes.remove(request.user)
+            post.save()
+        else:
+            post.likes.add(request.user)
+            post.save()
+    if cururl == 'FromUserPost':
+        return HttpResponseRedirect(reverse('user-posts',kwargs={'username':post.author.username})+page_str)
+    elif cururl == 'FromDetail':
+        return HttpResponseRedirect(reverse('post-detail',kwargs={'pk':pk}))
+    else:
+        return HttpResponseRedirect(reverse('blog-home')+page_str)
 
 class PostListView(ListView):
     model = Post

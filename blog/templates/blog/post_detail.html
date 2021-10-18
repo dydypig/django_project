@@ -15,6 +15,18 @@
         </div>
         <h2 class="article-title">{{ object.title }}</h2>
         <p class="article-content">{{ object.content }}</p>
+        <form method="POST" action='{% url "blog-like-post" "FromDetail" object.pk %}'>
+            {% csrf_token %}
+            <div class="form-group">
+              {% if user in object.likes.all %}
+                <button class="btn bg-danger text-white btn-sm rounded-circle" type="submit" name='pages' value="{{page_obj.number}}">Likes</button>
+                <a>{{object.num_likes}}</a> 
+              {% else %}
+                <button class="btn bg-light text-dark btn-sm rounded-circle" type="submit" name='pages' value="{{page_obj.number}}">Likes</button>
+                <a>{{object.num_likes}}</a> 
+              {% endif %}
+            </div>
+        </form>
         </div>
     </article>
 {% endblock content %}

@@ -17,6 +17,18 @@
               <small class="text-muted">{{ post.date_posted|date:"F d, Y" }}</small>
             </div>
             <p class="article-content">{{ post.content }}</p>
+            <form method="POST" action='{% url "blog-like-post" "FromUserPost" post.pk %}'>
+              {% csrf_token %}
+              <div class="form-group">
+                {% if user in post.likes.all %}
+                  <button class="btn bg-danger text-white btn-sm rounded-circle" type="submit" name='pages' value="{{page_obj.number}}">Likes</button>
+                  <a>{{post.num_likes}}</a> 
+                {% else %}
+                  <button class="btn bg-light text-dark btn-sm rounded-circle" type="submit" name='pages' value="{{page_obj.number}}">Likes</button>
+                  <a>{{post.num_likes}}</a> 
+                {% endif %}
+              </div>
+            </form>
           </div>
         </article>
     {% endfor %}

@@ -9,10 +9,17 @@ class Post(models.Model):
     content = models.TextField()
     date_posted = models.DateTimeField(default=timezone.now)
     author = models.ForeignKey(User,on_delete=models.CASCADE)
+    likes = models.ManyToManyField(User,related_name='blog_likes')
+    num_likes = models.IntegerField(default=0)
 
     def __str__(self):
         return self.title
 
+    def save(self,**kwarg):
+        self.num_likes = self.likes.all().count()
+        super().save(**kwarg)
+
+    # This will be called when a new instance is created and where to go to
     def get_absolute_url(self):
         return reverse('post-detail',kwargs={'pk':self.pk})
     
