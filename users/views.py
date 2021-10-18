@@ -1,13 +1,24 @@
 from django.shortcuts import render,redirect
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
 from django.contrib.auth import user_logged_in
 from django.contrib import messages
 from .forms import UserRegisterForm, UserUpdateFrom, ProfileUpdateForm
 from django.contrib.auth.models import User
 from django.core.files.storage import default_storage
 
+@login_required
+def delete_account_confirm(request):
+    if request.method == 'POST':
+        cur_u = request.user
+        username=cur_u.username
+        logout(request)
+        u = User.objects.filter(username=username).first()
+        u.delete()
+        messages.success(request,f'{username} has been deleted')
+        return redirect('blog-home')
+    return render(request,'users/profile_confirm_delete.html')
 
 # Create your views here.
 def register(request):

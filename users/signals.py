@@ -7,8 +7,11 @@ from django.core.files.storage import default_storage
 @receiver(pre_delete,sender=Profile)
 def delete_profile_pic(sender,instance,**kwargs):
     p = instance
-    if p.image.file.name != 'default.jpg':
-        default_storage.delete(p.image.file.name)
+    try:
+        if p.image.file.name != 'default.jpg':
+            default_storage.delete(p.image.file.name)
+    except:
+        pass
 
 @receiver(post_save, sender=User)
 def create_profile(sender,instance,created,**kwargs):

@@ -25,6 +25,12 @@ class UserPostListView(ListView):
     # ordering = ['-date_posted']
     paginate_by = 5
 
+    def get_context_data(self, **kwargs):
+        user = get_object_or_404(User, username=self.kwargs.get('username'))
+        context = super(UserPostListView, self).get_context_data(**kwargs)
+        context.update({'users': user })
+        return context
+
     def get_queryset(self):
         user = get_object_or_404(User, username=self.kwargs.get('username'))
         return Post.objects.filter(author=user).order_by('-date_posted')
