@@ -8,15 +8,8 @@
 ######################
 *.pyc
 
-# pictures #
+# folders to ignore #
 ######################
-*.jpg
-*.png
-*.JPG
-
-
-
-# migrations #
-######################
-migrations
-__pycache__
+migrations/
+__pycache__/
+media/
