@@ -17,6 +17,7 @@ def like_view(request,cururl,pk):
     post = get_object_or_404(Post,id=pk)
     page = request.POST.get('pages')
     page_str = "?page=" + str(page)
+    pk_str = '#' + str(pk)
     if request.user.is_authenticated:
         if request.user in post.likes.all():
             post.likes.remove(request.user)
@@ -25,11 +26,11 @@ def like_view(request,cururl,pk):
             post.likes.add(request.user)
             post.save()
     if cururl == 'FromUserPost':
-        return HttpResponseRedirect(reverse('user-posts',kwargs={'username':post.author.username})+page_str)
+        return HttpResponseRedirect(reverse('user-posts',kwargs={'username':post.author.username})+page_str+pk_str)
     elif cururl == 'FromDetail':
-        return HttpResponseRedirect(reverse('post-detail',kwargs={'pk':pk}))
+        return HttpResponseRedirect(reverse('post-detail',kwargs={'pk':pk})+pk_str)
     else:
-        return HttpResponseRedirect(reverse('blog-home')+page_str)
+        return HttpResponseRedirect(reverse('blog-home')+page_str+pk_str)
 
 class PostListView(ListView):
     model = Post
@@ -61,7 +62,7 @@ class PostDetailView(DetailView):
 
 class PostCreateView(LoginRequiredMixin,CreateView):
     model = Post
-    fields = ['title','content']
+    fields = ['title','content','image']
 
     def form_valid(self,form,*args,**kwargs):
         form.instance.author = self.request.user
@@ -69,7 +70,7 @@ class PostCreateView(LoginRequiredMixin,CreateView):
 
 class PostUpdateView(LoginRequiredMixin,UserPassesTestMixin,UpdateView):
     model = Post
-    fields = ['title','content']
+    fields = ['title','content','image']
 
     def form_valid(self,form,*args,**kwargs):
         form.instance.author = self.request.user
