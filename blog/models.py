@@ -16,7 +16,8 @@ class Post(models.Model):
         return self.title
 
     def save(self,**kwarg):
-        self.num_likes = self.likes.all().count()
+        if self.id != None:
+            self.num_likes = self.likes.all().count()
         super().save(**kwarg)
 
     # This will be called when a new instance is created and where to go to
