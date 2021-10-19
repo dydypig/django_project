@@ -16,23 +16,9 @@ def delete_profile_pic(sender,instance,**kwargs):
 @receiver(post_save, sender=User)
 def create_profile(sender,instance,created,**kwargs):
     if created:
-        # Profile.objects.create(user=instance) # error when creating new user need further investigation
-        p = Profile(user=instance)
-        p.save()
+        Profile.objects.create(user=instance)
     else:
         if hasattr(instance,'profile'):
             instance.profile.save()
         else:
-            Profile.objects.create(user=instance)     
-
-# @receiver(post_save, sender=User)
-# def create_profile(sender,instance,**kwargs):
-#     instance.profile.save()
-# @receiver(pre_save, sender=User)
-# def create_profile(sender,instance,**kwargs):
-#     try:
-#         instance.profile.save()
-#     except AttributeError:
-#         Profile.objects.create(user=instance)
-#         instance.profile.save()
-
+            Profile.objects.create(user=instance)

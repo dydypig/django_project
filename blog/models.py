@@ -25,6 +25,11 @@ class Post(models.Model):
     def get_absolute_url(self):
         return reverse('post-detail',kwargs={'pk':self.pk})
     
-
+class PostCache(models.Model):
+    post = models.OneToOneField(Post,on_delete=models.CASCADE)
+    image = models.TextField(default=None,null=True, blank=True)
+    
+    def __str__(self):
+        return f'{self.post.title} Profile'
 
 
