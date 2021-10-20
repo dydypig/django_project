@@ -17,8 +17,10 @@ class Post(models.Model):
         return self.title
 
     def save(self,**kwarg):
+        print('save start now')
         if self.id != None:
             self.num_likes = self.likes.all().count()
+        print('before super save')
         super().save(**kwarg)
 
     # This will be called when a new instance is created and where to go to

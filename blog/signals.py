@@ -14,6 +14,7 @@ def delete_profile_pic(sender,instance,**kwargs):
 
 @receiver(post_save,sender=Post)
 def delete_profile_pic(sender,instance,created,**kwargs):
+    print('detect signal')
     if created:
         if instance.image:
             PostCache.objects.create(post=instance, image=instance.image.file.name)
@@ -30,7 +31,10 @@ def delete_profile_pic(sender,instance,created,**kwargs):
             default_storage.delete(pc.image)
             pc.image=None
             pc.save()
-        elif not pc and instance.image:
+        elif not pc and instance.image: # pc not existing but image exist
             PostCache.objects.create(post=instance, image=instance.image.file.name)
-        else:
+        elif pc and not instance.image:
+            pc.image=None
+            pc.save()
+        else: # pc not existing and image not exist either, create pc
             PostCache.objects.create(post=instance)
