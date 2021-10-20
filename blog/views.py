@@ -5,6 +5,8 @@ from .models import Post
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.http import HttpResponseRedirect
 from django.urls import reverse
+from users.models import Friend
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 def home(request):
@@ -12,6 +14,23 @@ def home(request):
         'posts':Post.objects.all()
     }
     return render(request, 'blog/home.html',context)
+
+@login_required
+def follow_view(request,username,follow):
+    blog_viewer = request.user
+    blog_author=User.objects.get(username=username)
+    blog_viewer_f = Friend.objects.get(user=blog_viewer)
+    blog_author_f = Friend.objects.get(user=blog_author)
+    print(blog_viewer)
+    print(blog_author)
+    print(follow)
+    if follow == 'Following' or follow == 'Friend':
+        blog_viewer_f.following.remove(blog_author)
+        blog_author_f.follower.remove(blog_viewer)
+    else:
+        blog_viewer_f.following.add(blog_author)
+        blog_author_f.follower.add(blog_viewer)
+    return redirect('user-posts',username)
 
 def like_view(request,cururl,pk):
     post = get_object_or_404(Post,id=pk)
@@ -48,8 +67,14 @@ class UserPostListView(ListView):
 
     def get_context_data(self, **kwargs):
         user = get_object_or_404(User, username=self.kwargs.get('username'))
+        myfriend = Friend.objects.get(user=self.request.user)
+        to_follow = Friend.is_friends(myfriend,user)
+        print(self.request.user)
+        print(user)
+        print(to_follow)
         context = super(UserPostListView, self).get_context_data(**kwargs)
         context.update({'users': user })
+        context.update({'follow':to_follow})
         return context
 
     def get_queryset(self):
@@ -91,8 +116,6 @@ class PostDeleteView(LoginRequiredMixin,UserPassesTestMixin,DeleteView):
         if self.request.user == post.author:
             return True
         return False
-
-    
 
 def about(request):
     return render(request, 'blog/about.html')
