@@ -14,7 +14,6 @@ def delete_profile_pic(sender,instance,**kwargs):
 
 @receiver(post_save,sender=Post)
 def delete_profile_pic(sender,instance,created,**kwargs):
-    print('detect signal')
     if created:
         if instance.image:
             PostCache.objects.create(post=instance, image=instance.image.file.name)

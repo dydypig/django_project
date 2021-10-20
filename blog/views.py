@@ -22,6 +22,9 @@ def follow_view(request,username,follow):
         return redirect('login')
     blog_viewer = request.user
     blog_author=User.objects.get(username=username)
+    # save users to force send signal to create Friend model
+    blog_viewer.save()
+    blog_author.save()
     blog_viewer_f = Friend.objects.get(user=blog_viewer)
     blog_author_f = Friend.objects.get(user=blog_author)
     print(blog_viewer)
@@ -35,7 +38,6 @@ def follow_view(request,username,follow):
         blog_author_f.follower.add(blog_viewer)
     return redirect('user-posts',username)
 
-# Need to fix this later add back p.save()
 def like_view(request,cururl,pk):
     if request.user.is_anonymous:
         messages.add_message(request, messages.INFO,
@@ -48,10 +50,10 @@ def like_view(request,cururl,pk):
     if request.user.is_authenticated:
         if request.user in post.likes.all():
             post.likes.remove(request.user)
-            # post.save()
+            post.save()
         else:
             post.likes.add(request.user)
-            # post.save()
+            post.save()
     if cururl == 'FromUserPost':
         return HttpResponseRedirect(reverse('user-posts',kwargs={'username':post.author.username})+page_str+pk_str)
     elif cururl == 'FromDetail':
@@ -76,6 +78,7 @@ class UserPostListView(ListView):
     def get_context_data(self, **kwargs):
         user = get_object_or_404(User, username=self.kwargs.get('username'))
         if self.request.user.is_authenticated:
+            self.request.user.save() # save user to force send signal to create Friend model
             myfriend = Friend.objects.get(user=self.request.user)
             to_follow = Friend.is_friends(myfriend,user)
         else:
