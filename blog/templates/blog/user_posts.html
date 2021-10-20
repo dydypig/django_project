@@ -17,8 +17,10 @@
         {% elif follow == 'Following' %}
           
           <a class='btn btn-outline-info mb-4 text-white bg-info' href="{% url 'blog-follow' users.username follow %}">Unfollow</a>
-        {% else %}
+        {% elif follow == 'Self' %}
           {{users.email}}
+        {% else %}
+          <a class='btn btn-outline-info mb-4' href="{% url 'blog-follow' users.username follow %}">Follow</a>
         {% endif %}
       </div>
     </div>

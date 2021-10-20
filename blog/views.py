@@ -6,7 +6,7 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from users.models import Friend
-from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 
 # Create your views here.
 def home(request):
@@ -15,8 +15,11 @@ def home(request):
     }
     return render(request, 'blog/home.html',context)
 
-@login_required
 def follow_view(request,username,follow):
+    if request.user.is_anonymous:
+        messages.add_message(request, messages.INFO,
+                             'You need to log in to follow ' + username + ' !')
+        return redirect('login')
     blog_viewer = request.user
     blog_author=User.objects.get(username=username)
     blog_viewer_f = Friend.objects.get(user=blog_viewer)
@@ -32,7 +35,12 @@ def follow_view(request,username,follow):
         blog_author_f.follower.add(blog_viewer)
     return redirect('user-posts',username)
 
+# Need to fix this later add back p.save()
 def like_view(request,cururl,pk):
+    if request.user.is_anonymous:
+        messages.add_message(request, messages.INFO,
+                             'You need to log in to like this post!')
+        return redirect('login')
     post = get_object_or_404(Post,id=pk)
     page = request.POST.get('pages')
     page_str = "?page=" + str(page)
@@ -40,10 +48,10 @@ def like_view(request,cururl,pk):
     if request.user.is_authenticated:
         if request.user in post.likes.all():
             post.likes.remove(request.user)
-            post.save()
+            # post.save()
         else:
             post.likes.add(request.user)
-            post.save()
+            # post.save()
     if cururl == 'FromUserPost':
         return HttpResponseRedirect(reverse('user-posts',kwargs={'username':post.author.username})+page_str+pk_str)
     elif cururl == 'FromDetail':
@@ -67,11 +75,11 @@ class UserPostListView(ListView):
 
     def get_context_data(self, **kwargs):
         user = get_object_or_404(User, username=self.kwargs.get('username'))
-        myfriend = Friend.objects.get(user=self.request.user)
-        to_follow = Friend.is_friends(myfriend,user)
-        print(self.request.user)
-        print(user)
-        print(to_follow)
+        if self.request.user.is_authenticated:
+            myfriend = Friend.objects.get(user=self.request.user)
+            to_follow = Friend.is_friends(myfriend,user)
+        else:
+            to_follow = 'UserNotLogIn'
         context = super(UserPostListView, self).get_context_data(**kwargs)
         context.update({'users': user })
         context.update({'follow':to_follow})
